@@ -22,8 +22,8 @@ class ConvertCOCOToYOLO:
         
     """
 
-    def __init__(self, img_folder, json_path):
-        self.img_folder = img_folder
+    def __init__(self, img_path, json_path):
+        self.img_folder = img_path
         self.json_path = json_path
         
 
@@ -57,15 +57,15 @@ class ConvertCOCOToYOLO:
         dh = 1./size[0]
         x = (xmin + xmax)/2.0
         y = (ymin + ymax)/2.0
-        w = xmax — xmin
-        h = ymax — ymin
+        w = xmax - xmin
+        h = ymax - ymin
         x = x*dw
         w = w*dw
         y = y*dh
         h = h*dh
         return (x,y,w,h)
 
-    def convert(self,annotation_key='annotations',img_id='image_id',cat_id='category_id',bbox='bbox'):
+    def convert(self,annotation_key='annotations',img_id='image_id',cat_id='category_id',bbox_='bbox'):
         # Enter directory to read JSON file
         data = json.load(open(self.json_path))
         
@@ -77,14 +77,15 @@ class ConvertCOCOToYOLO:
             # Get required data
             image_id = f'{data[annotation_key][i][img_id]}'
             category_id = f'{data[annotation_key][i][cat_id]}'
-            bbox = data[annotation_key][i][bbox]
+            bbox = data[annotation_key][i][bbox_]
 
             # Retrieve image.
             if self.img_folder == None:
                 image_path = f'{image_id}.jpg'
             else:
-                image_path = f'./{self.img_folder}/{image_id}.jpg'
+                image_path = f'{self.img_folder}/{image_id}.jpg'
 
+            print(image_path)
 
             # Convert the data
             kitti_bbox = [bbox[0], bbox[1], bbox[2] + bbox[0], bbox[3] + bbox[1]]
@@ -98,7 +99,7 @@ class ConvertCOCOToYOLO:
             # Export 
             if image_id in check_set:
                 # Append to existing file as there can be more than one label in each image
-                file = open(filename, "a”)
+                file = open(filename, "a")
                 file.write("\n")
                 file.write(content)
                 file.close()
@@ -106,7 +107,7 @@ class ConvertCOCOToYOLO:
             elif image_id not in check_set:
                 check_set.add(image_id)
                 # Write files
-                file = open(filename, "w”)
+                file = open(filename, "w")
                 file.write(content)
                 file.close()
 
